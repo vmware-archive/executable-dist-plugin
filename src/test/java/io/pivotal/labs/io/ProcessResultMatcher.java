@@ -1,5 +1,6 @@
-package io.pivotal.labs.distjar;
+package io.pivotal.labs.io;
 
+import io.pivotal.labs.test.MatcherUtils;
 import org.hamcrest.Matcher;
 
 public class ProcessResultMatcher {

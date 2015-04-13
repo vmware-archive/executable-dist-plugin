@@ -1,4 +1,6 @@
-package io.pivotal.labs.distjar;
+package io.pivotal.labs.io;
+
+import io.pivotal.labs.distjar.Main;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

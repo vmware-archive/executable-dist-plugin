@@ -1,5 +1,9 @@
 package io.pivotal.labs.distjar;
 
+import io.pivotal.labs.io.PostOrderVisitor;
+import io.pivotal.labs.io.ProcessResult;
+import io.pivotal.labs.io.ZipUtils;
+import io.pivotal.labs.util.StreamUtils;
 import org.junit.After;
 import org.junit.Test;
 
@@ -14,9 +18,9 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipOutputStream;
 
-import static io.pivotal.labs.distjar.MatcherUtils.allOf;
-import static io.pivotal.labs.distjar.PathMatchers.exists;
-import static io.pivotal.labs.distjar.ProcessResultMatcher.*;
+import static io.pivotal.labs.io.ProcessResultMatcher.*;
+import static io.pivotal.labs.test.MatcherUtils.allOf;
+import static io.pivotal.labs.test.PathMatchers.exists;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isEmptyString;

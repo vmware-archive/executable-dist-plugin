@@ -1,4 +1,4 @@
-package io.pivotal.labs.distjar;
+package io.pivotal.labs.test;
 
 import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;

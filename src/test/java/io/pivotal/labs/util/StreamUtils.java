@@ -1,4 +1,4 @@
-package io.pivotal.labs.distjar;
+package io.pivotal.labs.util;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;

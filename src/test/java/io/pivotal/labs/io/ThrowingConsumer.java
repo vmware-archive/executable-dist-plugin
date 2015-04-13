@@ -1,4 +1,4 @@
-package io.pivotal.labs.distjar;
+package io.pivotal.labs.io;
 
 public interface ThrowingConsumer<T, E extends Exception> {
 

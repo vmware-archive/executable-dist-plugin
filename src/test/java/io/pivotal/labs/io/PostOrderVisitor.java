@@ -1,4 +1,4 @@
-package io.pivotal.labs.distjar;
+package io.pivotal.labs.io;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
