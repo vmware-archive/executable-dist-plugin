@@ -2,13 +2,13 @@ package io.pivotal.labs.distjar;
 
 import io.pivotal.labs.io.*;
 import io.pivotal.labs.util.StreamUtils;
+import org.apache.tools.zip.ZipOutputStream;
 import org.junit.After;
 import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.zip.ZipOutputStream;
 
 import static io.pivotal.labs.io.ProcessResultMatcher.*;
 import static io.pivotal.labs.test.MatcherUtils.allOf;
