@@ -1,21 +1,13 @@
 package io.pivotal.labs.distjar;
 
-import io.pivotal.labs.io.PostOrderVisitor;
-import io.pivotal.labs.io.ProcessResult;
-import io.pivotal.labs.io.ZipUtils;
+import io.pivotal.labs.io.*;
 import io.pivotal.labs.util.StreamUtils;
 import org.junit.After;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 import java.util.zip.ZipOutputStream;
 
 import static io.pivotal.labs.io.ProcessResultMatcher.*;
@@ -43,18 +35,9 @@ public class MainTest {
         String mainClassFilePath = pathForClass(Main.class);
 
         try (ZipOutputStream zip = ZipUtils.file(zipFile)) {
-            try (OutputStream entry = ZipUtils.entry(zip, "META-INF/MANIFEST.MF")) {
-                Manifest manifest = createManifest(Collections.singletonMap("Main-Class", Main.class.getName()));
-                manifest.write(entry);
-            }
-            try (OutputStream entry = ZipUtils.entry(zip, mainClassFilePath)) {
-                try (InputStream resourceAsStream = openResource("/" + mainClassFilePath)) {
-                    Main.copy(resourceAsStream, entry, new byte[1024]);
-                }
-            }
-            try (OutputStream entry = ZipUtils.entry(zip, "hello.txt")) {
-                entry.write("Hello, world!\n".getBytes());
-            }
+            ZipUtils.entry(zip, "META-INF/MANIFEST.MF", ManifestUtils.toByteArray(ManifestUtils.create(Collections.singletonMap("Main-Class", Main.class.getName()))));
+            ZipUtils.entry(zip, mainClassFilePath, ResourceUtils.load(mainClassFilePath));
+            ZipUtils.entry(zip, "hello.txt", "Hello, world!\n".getBytes());
         }
 
         tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
@@ -74,20 +57,6 @@ public class MainTest {
 
     private String pathForClass(Class<?> cl) {
         return cl.getName().replace('.', '/') + ".class";
-    }
-
-    private Manifest createManifest(Map<String, String> attributes) {
-        Manifest manifest = new Manifest();
-        Attributes mainAttributes = manifest.getMainAttributes();
-        mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        attributes.forEach(mainAttributes::putValue);
-        return manifest;
-    }
-
-    private InputStream openResource(String name) throws FileNotFoundException {
-        InputStream in = getClass().getResourceAsStream(name);
-        if (in == null) throw new FileNotFoundException(name);
-        return in;
     }
 
 }
