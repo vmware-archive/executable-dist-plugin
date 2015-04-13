@@ -3,8 +3,10 @@ package io.pivotal.labs.distjar;
 import io.pivotal.labs.io.*;
 import io.pivotal.labs.util.StreamUtils;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -22,6 +24,12 @@ public class MainTest {
     private Path zipFile;
     private Path tempDirectory;
 
+    @Before
+    public void setUp() throws Exception {
+        zipFile = Files.createTempFile(getClass().getSimpleName(), ".jar");
+        tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
+    }
+
     @After
     public void tearDown() throws Exception {
         Files.delete(zipFile);
@@ -30,8 +38,6 @@ public class MainTest {
 
     @Test
     public void unpacksTheEnclosingJar() throws Exception {
-        zipFile = Files.createTempFile(getClass().getSimpleName(), ".jar");
-
         String mainClassFilePath = pathForClass(Main.class);
 
         try (ZipOutputStream zip = ZipUtils.file(zipFile)) {
@@ -39,8 +45,6 @@ public class MainTest {
             ZipUtils.entry(zip, mainClassFilePath, ResourceUtils.load(mainClassFilePath));
             ZipUtils.entry(zip, "hello.txt", "Hello, world!\n".getBytes());
         }
-
-        tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
 
         ProcessResult result = ProcessResult.of(
                 "java",
@@ -51,12 +55,16 @@ public class MainTest {
                 hasExitValue(equalTo(0)),
                 hasOutput(isEmptyString()),
                 hasError(isEmptyString())));
-        Path unpackDirectory = Files.list(tempDirectory).collect(StreamUtils.only());
-        assertThat(unpackDirectory.resolve("hello.txt"), exists(equalTo(true)));
+
+        assertThat(unpackDirectory().resolve("hello.txt"), exists(equalTo(true)));
     }
 
     private String pathForClass(Class<?> cl) {
         return cl.getName().replace('.', '/') + ".class";
+    }
+
+    private Path unpackDirectory() throws IOException {
+        return Files.list(tempDirectory).collect(StreamUtils.only());
     }
 
 }
