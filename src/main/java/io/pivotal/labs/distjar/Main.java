@@ -6,7 +6,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -18,8 +21,21 @@ public class Main {
         URL classUrl = findClassFile(Main.class);
         URL jarUrl = enclosingJar(classUrl);
         String jarPath = pathForFileUrl(jarUrl);
+
         Path unpackDir = Files.createTempDirectory("distjar");
         unpackJarFile(jarPath, unpackDir);
+
+        Path distDir = findDistDir(unpackDir, "META-INF", "io");
+        Path binDir = distDir.resolve("bin");
+        Path startScript = findStartScript(binDir);
+
+        makeExecutable(startScript);
+        Process process = new ProcessBuilder()
+                .command(commandLine(startScript.toString(), args))
+                .inheritIO()
+                .start();
+        int status = process.waitFor();
+        System.exit(status);
     }
 
     private static URL findClassFile(Class<?> cl) throws FileNotFoundException {
@@ -78,6 +94,39 @@ public class Main {
         while ((read = in.read(buffer)) != -1) {
             out.write(buffer, 0, read);
         }
+    }
+
+    private static Path findDistDir(Path unpackDir, String... excluded) throws IOException {
+        Collection<String> excludedCollection = Arrays.asList(excluded);
+        return Files.list(unpackDir)
+                .filter(path -> Files.isDirectory(path) && !excludedCollection.contains(path.getFileName().toString()))
+                .collect(singleObject());
+    }
+
+    private static Path findStartScript(Path binDir) throws IOException {
+        boolean windows = System.getProperty("os.name").startsWith("Windows");
+        return Files.list(binDir)
+                .filter(path -> path.endsWith(".bat") == windows)
+                .collect(singleObject());
+    }
+
+    private static <E> Collector<E, ?, E> singleObject() {
+        return Collectors.collectingAndThen(Collectors.reducing((a, b) -> {
+            throw new NoSuchElementException("element is not unique: " + a + ", " + b);
+        }), Optional::get);
+    }
+
+    private static void makeExecutable(Path path) throws IOException {
+        Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
+        permissions.add(PosixFilePermission.OWNER_EXECUTE);
+        Files.setPosixFilePermissions(path, permissions);
+    }
+
+    private static List<String> commandLine(String executable, String... args) {
+        List<String> commandLine = new ArrayList<>();
+        commandLine.add(executable);
+        commandLine.addAll(Arrays.asList(args));
+        return commandLine;
     }
 
 }

@@ -51,12 +51,69 @@ public class MainTest {
                 "-Djava.io.tmpdir=" + tempDirectory,
                 "-jar", zipFile.toString());
 
+        assertThat(unpackDirectory().resolve("hello.txt"), exists(equalTo(true)));
+    }
+
+    @Test
+    public void runsTheStartScript() throws Exception {
+        String mainClassFilePath = pathForClass(Main.class);
+
+        try (ZipOutputStream zip = ZipUtils.file(zipFile)) {
+            ZipUtils.entry(zip, "META-INF/MANIFEST.MF", ManifestUtils.toByteArray(ManifestUtils.create(Collections.singletonMap("Main-Class", Main.class.getName()))));
+            ZipUtils.entry(zip, mainClassFilePath, ResourceUtils.load(mainClassFilePath));
+            ZipUtils.entry(zip, "myapp-1.0.0/bin/runMyApp", "#! /bin/sh\n\necho \"hello from myapp\"\n".getBytes());
+        }
+
+        ProcessResult result = ProcessResult.of(
+                "java",
+                "-Djava.io.tmpdir=" + tempDirectory,
+                "-jar", zipFile.toString());
+
         assertThat(result, allOf(
                 hasExitValue(equalTo(0)),
-                hasOutput(isEmptyString()),
+                hasOutput(equalTo("hello from myapp\n")),
                 hasError(isEmptyString())));
+    }
 
-        assertThat(unpackDirectory().resolve("hello.txt"), exists(equalTo(true)));
+    @Test
+    public void relaysTheArgumentsToTheStartScript() throws Exception {
+        String mainClassFilePath = pathForClass(Main.class);
+
+        try (ZipOutputStream zip = ZipUtils.file(zipFile)) {
+            ZipUtils.entry(zip, "META-INF/MANIFEST.MF", ManifestUtils.toByteArray(ManifestUtils.create(Collections.singletonMap("Main-Class", Main.class.getName()))));
+            ZipUtils.entry(zip, mainClassFilePath, ResourceUtils.load(mainClassFilePath));
+            ZipUtils.entry(zip, "myapp-1.0.0/bin/runMyApp", "#! /bin/sh\n\necho \"hello $*\"\n".getBytes());
+        }
+
+        ProcessResult result = ProcessResult.of(
+                "java",
+                "-Djava.io.tmpdir=" + tempDirectory,
+                "-jar", zipFile.toString(),
+                "Earth", "Mars", "Venus");
+
+        assertThat(result, allOf(
+                hasExitValue(equalTo(0)),
+                hasOutput(equalTo("hello Earth Mars Venus\n")),
+                hasError(isEmptyString())));
+    }
+
+    @Test
+    public void relaysTheExitStatusFromTheStartScript() throws Exception {
+        String mainClassFilePath = pathForClass(Main.class);
+
+        try (ZipOutputStream zip = ZipUtils.file(zipFile)) {
+            ZipUtils.entry(zip, "META-INF/MANIFEST.MF", ManifestUtils.toByteArray(ManifestUtils.create(Collections.singletonMap("Main-Class", Main.class.getName()))));
+            ZipUtils.entry(zip, mainClassFilePath, ResourceUtils.load(mainClassFilePath));
+            ZipUtils.entry(zip, "myapp-1.0.0/bin/runMyApp", "#! /bin/sh\n\nexit 99\n".getBytes());
+        }
+
+        ProcessResult result = ProcessResult.of(
+                "java",
+                "-Djava.io.tmpdir=" + tempDirectory,
+                "-jar", zipFile.toString());
+
+        assertThat(result, allOf(
+                hasExitValue(equalTo(99))));
     }
 
     private String pathForClass(Class<?> cl) {
