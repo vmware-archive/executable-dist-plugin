@@ -23,4 +23,8 @@ public class ResourceUtils {
         return in;
     }
 
+    public static InputStream open(Class<?> cl, String name) throws FileNotFoundException {
+        return open(cl.getPackage().getName().replace('.', '/') + "/" + name);
+    }
+
 }

@@ -9,7 +9,12 @@ import java.io.InputStream;
 public class ProcessResult {
 
     public static ProcessResult of(String... command) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(command).start();
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        return of(processBuilder);
+    }
+
+    public static ProcessResult of(ProcessBuilder processBuilder) throws IOException, InterruptedException {
+        Process process = processBuilder.start();
         process.waitFor();
         return of(process);
     }
@@ -30,6 +35,7 @@ public class ProcessResult {
 
     private final int exitValue;
     private final String output;
+
     private final String error;
 
     public ProcessResult(int exitValue, String output, String error) {
@@ -49,5 +55,4 @@ public class ProcessResult {
     public String getError() {
         return error;
     }
-
 }
