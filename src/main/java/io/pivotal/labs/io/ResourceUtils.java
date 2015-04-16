@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 public class ResourceUtils {
 
@@ -25,6 +26,12 @@ public class ResourceUtils {
 
     public static InputStream open(Class<?> cl, String name) throws FileNotFoundException {
         return open(cl.getPackage().getName().replace('.', '/') + "/" + name);
+    }
+
+    public static URL findResource(String name) throws FileNotFoundException {
+        URL url = ResourceUtils.class.getClassLoader().getResource(name);
+        if (url == null) throw new FileNotFoundException(name);
+        return url;
     }
 
 }

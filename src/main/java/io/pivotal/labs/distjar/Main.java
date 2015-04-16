@@ -106,7 +106,7 @@ public class Main {
     private static Path findStartScript(Path binDir) throws IOException {
         boolean windows = System.getProperty("os.name").startsWith("Windows");
         return Files.list(binDir)
-                .filter(path -> path.endsWith(".bat") == windows)
+                .filter(path -> path.toString().endsWith(".bat") == windows)
                 .collect(singleObject());
     }
 

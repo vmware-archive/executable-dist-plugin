@@ -1,7 +1,17 @@
+buildscript {
+    dependencies {
+        classpath files('dist-jar-plugin.jar')
+        classpath files('ant.jar')
+    }
+}
+
 plugins {
     id 'java'
     id 'application'
 }
+
+import io.pivotal.labs.distjar.DistJarPlugin
+apply plugin: DistJarPlugin
 
 repositories {
     jcenter()
