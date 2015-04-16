@@ -1,0 +1,24 @@
+buildscript {
+    dependencies {
+        classpath files('lib/exedist.jar')
+    }
+}
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+import io.pivotal.labs.exedist.ExecutableDistZipPlugin
+
+apply plugin: ExecutableDistZipPlugin
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
+}
+
+mainClassName = 'Hello'
