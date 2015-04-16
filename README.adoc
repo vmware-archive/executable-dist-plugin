@@ -1,0 +1,42 @@
+A Gradle plugin which makes distribution zips runnable, as a sort of alternative to an uberjar. A London Beach production :guardsman::palm_tree:.
+
+To build:
+
+```
+./gradlew build
+```
+
+To use:
+
+… er, currently, you'll need to vendor the plugin jar into your project and import and apply the plugin:
+
+```
+buildscript {
+    dependencies {
+        classpath files('lib/executable-dist-plugin-0.0.1.jar')
+    }
+}
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+import io.pivotal.labs.exedist.ExecutableDistZipPlugin
+apply plugin: ExecutableDistZipPlugin
+```
+
+Proper plugin support is next on the agenda!
+
+With the plugin applied, you gain an `executableDistZip` task which makes an executable version of the distribution zip. So you can do:
+
+```
+./gradlew executableDistZip
+./build/distributions/myapp-exe.zip
+```
+
+The executable zip requires a POSIX-compliant shell at /bin/sh (bash and dash are both fine), and an unzip command somewhere on the path. It runs the start script that Gradle builds, which may impose requirements of its own.
+
+Command-line arguments to the zip are passed on to the start script, and thence to the application. The start script will also use the contents of a `JAVA_OPTS` or `<APPNAME>_OPTS` environment variable as arguments to the Java command.
+
+The zip exec's the start script, which in turn exec's the Java command, so the application ultimately runs with the PID initially assigned to the executable zip.
