@@ -130,9 +130,8 @@ public class GradleProject implements Closeable {
         ProcessBuilder processBuilder = new ProcessBuilder()
                 .directory(projectRoot.toFile())
                 .command(commandLine);
-        if (inheritIo) processBuilder.inheritIO();
 
-        ProcessResult result = ProcessResult.of(processBuilder);
+        ProcessResult result = ProcessResult.of(processBuilder, inheritIo);
 
         int exitValue = result.getExitValue();
         if (exitValue != 0) assertThat(result.getError(), exitValue, equalTo(0));
