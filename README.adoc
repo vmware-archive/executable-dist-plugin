@@ -8,25 +8,15 @@ To build:
 
 To use:
 
-… er, currently, you'll need to vendor the plugin jar into your project and import and apply the plugin:
+The plugin is https://plugins.gradle.org/plugin/io.pivotal.labs.exedist[published on the Gradle Plugin Portal], so with a modern version of Gradle, you can write:
 
 ```
-buildscript {
-    dependencies {
-        classpath files('lib/executable-dist-plugin-0.0.1.jar')
-    }
-}
-
 plugins {
     id 'java'
     id 'application'
+    id 'io.pivotal.labs.exedist' version '1.0.0'
 }
-
-import io.pivotal.labs.exedist.ExecutableDistZipPlugin
-apply plugin: ExecutableDistZipPlugin
 ```
-
-Proper plugin support is next on the agenda!
 
 With the plugin applied, you gain an `executableDistZip` task which makes an executable version of the distribution zip. So you can do:
 
