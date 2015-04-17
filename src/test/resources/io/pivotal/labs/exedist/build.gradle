@@ -9,9 +9,7 @@ plugins {
     id 'application'
 }
 
-import io.pivotal.labs.exedist.ExecutableDistZipPlugin
-
-apply plugin: ExecutableDistZipPlugin
+apply plugin: 'io.pivotal.labs.exedist'
 
 repositories {
     jcenter()
